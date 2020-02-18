@@ -44,7 +44,17 @@ bool ValidCmndLength(char* user_input){
  *  
  **********************************************************************/     
 bool IgnoreInput(char* user_input){
-
+    if(strcmp(user_input, "\n") == 0){
+        printf("ignore newline\n");
+        return true;
+    }
+    if(strncmp(user_input, "#", 1) == 0){
+        printf("ignore newline\n");
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 /**********************************************************************
  *  
