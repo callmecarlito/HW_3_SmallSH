@@ -2,20 +2,29 @@
 #include "built_in_cmnds.h"
 
 int main(){
-        char* user_input = NULL;
+    char* user_input = NULL;
+    char* cmnd_args[MAX_ARGS];
+    int arg_count = 0;
+
+    int i;
+
+
     while(1){
-        user_input = GetInput();
-        printf("%s\n", user_input);
-        if(ValidCmndLength(user_input)){
-            printf("Command is of valid length\n");
-            fflush(stdout);
+        
+        arg_count = ProcessInput(user_input, cmnd_args);
+
+        printf("Args: [%d]\n", arg_count);
+        for(i = 0; i < arg_count; i++){
+            printf("[%d]: %s\n", i, cmnd_args[i]);
         }
-        if(strcmp(user_input, "exit\n") == 0){ /************ REMOVE "\n" **********/
+
+        if(strcmp(cmnd_args[0], "exit") == 0){ 
             printf("Exiting\n");
-            free(user_input);
+            FreeInput(cmnd_args);
             exit(0);
-        } 
-        free(user_input);
+        }
+        
+        FreeInput(cmnd_args);
     }
     return 0;
 }
