@@ -87,6 +87,8 @@ with fork() and using execvp() to execute command.
 ### run_shell.c
 Contains main method driving the shell.
 
+Currently, used for testing each module as it's built, but will eventually be used to drive the entire shell program.
+
 ### input_handling.h / input_handling.c
 Contains the methods needed to read user input from stdin, process the input, and pass it downstream for 
 execution of commands. 
@@ -94,6 +96,13 @@ execution of commands.
 - [ ] what to do if user enters leading whitespace(s)
 - [ ] test handling of inputs that exceed the maximum number of arguments
 
+### built_in_cmnds.h/ built_in_cmnds.c
+Contains the methods needed to execute the 3 built-in commands:
+1. exit
+2. status
+3. cd
+##### task list
+- [ ] outline each function required
 
 ## compiling and running
 Make sure to keep all the program files within the same directory. To compile from the terminal, 
