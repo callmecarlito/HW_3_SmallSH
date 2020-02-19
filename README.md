@@ -84,14 +84,15 @@ with fork() and using execvp() to execute command.
     - Foreground and background processes should ignore SIGSTP
 
 ## Structure
-### main
+### run_shell.c
 Contains main method driving the shell.
 
-### input_handling
+### input_handling.h / input_handling.c
 Contains the methods needed to read user input from stdin, process the input, and pass it downstream for 
 execution of commands. 
 ##### task list
-- [ ] what to do if user enters multiple empty spaces 
+- [ ] what to do if user enters leading whitespace(s)
+- [ ] test handling of inputs that exceed the maximum number of arguments
 
 
 ## compiling and running
