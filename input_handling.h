@@ -9,12 +9,13 @@
 #define MAX_LENGTH 2048
 #define MAX_ARGS 512
 
-void ProcessInput(char* user_input, char* cmnd_args[]);
+int ProcessInput(char* user_input, char* cmnd_args[]);
+void InputPrompt();
 char* GetInput();
 bool ValidCmndLength(char* user_input);
 bool IgnoreInput(char* user_input);
 void RemoveNewline(char* user_input);
-void ParseInput(char* user_input, char* cmnd_args[]);
-bool ValidNumArgs(char* cmnd_args[]);
+int ParseInput(char* user_input, char* cmnd_args[]);
+void FreeInput(char* cmnd_args[]);
 
 #endif
