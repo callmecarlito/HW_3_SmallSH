@@ -113,6 +113,7 @@ int ParseInput(char* user_input, char* cmnd_args[]){
         user_input = NULL;
         arg_count = 0;
     }
+    cmnd_args[arg_count] = NULL;
     return arg_count;
 }
 /**********************************************************************

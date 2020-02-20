@@ -27,7 +27,7 @@ int main(){
 
         //handling of built in commands
         if(strcmp(cmnd_args[0], "status") == 0){
-            int status_code;
+            int status_code = 123;
 
             StatusCmnd(status_code);
         }
