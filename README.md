@@ -102,8 +102,16 @@ Contains the methods needed to execute the 3 built-in commands:
 2. status
 3. cd
 ##### task list
-- [ ] outline each function required
+- [x] outline each function required
+- [ ] build exit command
+- [ ] build status command
+- [x] build cd command
 
+### other_cmnds.h/ other_cmnds.c
+Contains methogs required to execute non built-in commands
+#### task list
+- [ ] outline each function required
+ 
 ## compiling and running
 Make sure to keep all the program files within the same directory. To compile from the terminal, 
 navigate your way to the directory where the files can be found and type "make all" followed by
