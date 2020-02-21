@@ -104,11 +104,14 @@ int ParseInput(char* user_input, char* cmnd_args[]){
 
     //parses input using strtok() delimited by whitespace(s)
     arg = strtok(user_input, " ");    
-    while(arg != NULL && arg_count < MAX_ARGS){
+    while(arg != NULL && arg_count <= MAX_ARGS){
         cmnd_args[arg_count++] = arg; //stores pointer to argument in array
         arg = strtok(NULL, " ");
     }
-    if(arg_count >= MAX_ARGS){ //if MMAX_ARGS is exceeded
+    
+    //printf("arg_count: %d\n", arg_count);
+
+    if(arg_count > MAX_ARGS){ //if MMAX_ARGS is exceeded
         free(user_input);
         user_input = NULL;
         arg_count = 0;
