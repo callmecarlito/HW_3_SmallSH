@@ -1,5 +1,6 @@
 #include "input_handling.h"
 #include "built_in_cmnds.h"
+#include "exec_cmnds.h"
 
 int main(){
     char* user_input = NULL;
@@ -16,7 +17,7 @@ int main(){
         /*********** REMOVE *******************************/
         printf("\n(run_shell.c)\nArgs: [%d]\n", arg_count);
         for(i = 0; i < arg_count; i++){
-            printf("[%d]: %s\n", i, cmnd_args[i]);
+            printf("[%d]: %s [%d]\n", i, cmnd_args[i], (int)strlen(cmnd_args[i]));
         }
         printf("\n");
         /*********** REMOVE *******************************/
@@ -25,6 +26,8 @@ int main(){
             continue;
         }
 
+        CmndProcessing(cmnd_args, arg_count);
+        
         //handling of built in commands
         if(strcmp(cmnd_args[0], "status") == 0){
             int status_code = 123;
@@ -41,9 +44,10 @@ int main(){
             ExitCmnd(exit_code);
         }
         else{
-            /* code */
+            /* code */    
         }
         
+
         FreeInput(cmnd_args);
     }
     return 0;
