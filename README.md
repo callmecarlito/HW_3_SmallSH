@@ -94,7 +94,8 @@ Contains the methods needed to read user input from stdin, process the input, an
 execution of commands. 
 ##### task list
 - [ ] what to do if user enters leading whitespace(s)
-- [ ] test handling of inputs that exceed the maximum number of arguments
+- [X] test handling of inputs that exceed the maximum number of arguments
+- [ ] expansion of "$$" into the process ID of the shell ($$ can appear anywhere in the string)
 
 ### built_in_cmnds.h/ built_in_cmnds.c
 Contains the methods needed to execute the 3 built-in commands:
@@ -111,6 +112,7 @@ Contains the methods needed to execute the 3 built-in commands:
 Contains methogs required to execute commands
 #### task list
 - [ ] outline each function required
+  - [x] create flags for redirections and command processing
   - [ ] stdin redirections
   - [ ] stdout redirections
   - [ ] background processes
