@@ -1,32 +1,15 @@
 #include "exec_cmnds.h"
 
-/**********************************************************************
- * 
- **********************************************************************/
-void CmndProcessing(char* cmnd_args[], int arg_count){
-    int input_redir_index = 0, 
-        output_redir_index = 0;
 
-    Shell_Flags shell_flags;
-    InitializeFlags(&shell_flags);
-
-    SetBuiltInFlag(cmnd_args, &shell_flags);
-    SetBackgroundFlag(cmnd_args, arg_count, &shell_flags);
-    input_redir_index = SetStdinRedirFlag(cmnd_args, arg_count, &shell_flags);
-    output_redir_index = SetStdoutRedirFlag(cmnd_args, arg_count, &shell_flags);
-    
-    GetFlags(&shell_flags);
-    
-}
 /**********************************************************************
  * InitializeFlags() -
  **********************************************************************/
 void InitializeFlags(Shell_Flags* shell_flags){
 
-    shell_flags->built_in_flag = 0;
-    shell_flags->stdin_redirect = 0;
-    shell_flags->stdout_redirect = 0;
-    shell_flags->background_proc = 0;
+    shell_flags->built_in_flag = false;
+    shell_flags->stdin_redirect = false;
+    shell_flags->stdout_redirect = false;
+    shell_flags->background_proc = false;
 }
 /**********************************************************************
  * 
@@ -86,3 +69,86 @@ int SetStdoutRedirFlag(char* cmnd_args[], int arg_count, Shell_Flags* shell_flag
     }
     return 0;
 }
+/**********************************************************************
+ * 
+ **********************************************************************/
+char* SetInputRedir(char* cmnd_args[], int input_index){
+    return cmnd_args[input_index];
+}
+/**********************************************************************
+ * 
+ **********************************************************************/
+char* SetOutputRedir(char* cmnd_args[], int output_index){
+    return cmnd_args[output_index];
+}
+/**********************************************************************
+ * 
+ **********************************************************************/
+void RemoveCmndArgs(char* cmnd_args[], int* arg_count, int remove_index){
+    int current_element = remove_index,
+        next_element = remove_index + 1;
+    
+    if(remove_index == (*arg_count - 1)){
+        cmnd_args[remove_index] = NULL;
+    }
+    while(cmnd_args[next_element] != NULL){
+        cmnd_args[current_element] = cmnd_args[next_element];
+        current_element = next_element;
+        next_element++;
+    }
+    (*arg_count)--;
+}
+/**********************************************************************
+ * 
+ **********************************************************************/
+void RemoveBackgroundArg(char* cmnd_args[], int* arg_count){
+
+    cmnd_args[*arg_count - 1] = NULL;
+    (*arg_count)--;
+}
+/**********************************************************************
+ * 
+ **********************************************************************/
+void ExecBuiltIn(char* cmnd_args[], int exit_code){
+    //handling of built in commands
+    if(strcmp(cmnd_args[0], "status") == 0){
+
+        StatusCmnd(exit_code);
+    }
+    else if(strcmp(cmnd_args[0], "cd") == 0){
+
+        ChangeDirCmnd(cmnd_args);
+    }
+    else if(strcmp(cmnd_args[0], "exit") == 0){
+
+        free(cmnd_args[0]);
+        ExitCmnd(exit_code);
+    }
+}
+/**********************************************************************
+ * 
+ **********************************************************************/
+
+/**********************************************************************
+ * 
+ **********************************************************************/
+
+/**********************************************************************
+ * 
+ **********************************************************************/
+
+/**********************************************************************
+ * 
+ **********************************************************************/
+
+/**********************************************************************
+ * 
+ **********************************************************************/
+
+/**********************************************************************
+ * 
+ **********************************************************************/
+
+/**********************************************************************
+ * 
+ **********************************************************************/
