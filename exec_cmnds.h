@@ -21,10 +21,9 @@ int SetStdinRedirFlag(char* cmnd_args[], int arg_count, Shell_Flags* shell_flags
 int SetStdoutRedirFlag(char* cmnd_args[], int arg_count, Shell_Flags* shell_flags);
 void SetBackgroundFlag(char* cmnd_args[], int arg_count, Shell_Flags* shell_flags);
 
-char* SetInputRedir(char* cmnd_args[], int input_index);
-char* SetOutputRedir(char* cmnd_args[], int output_index);
-void RemoveCmndArgs(char* cmnd_args[], int* arg_count, int remove_index);
-void RemoveBackgroundArg(char* cmnd_args[], int* arg_count);
+char* GetRedirFile(char* cmnd_args[], int index);
+void RemoveCmndArgs(char* cmnd_args[], int* arg_count, Shell_Flags* shell_flags);
+void RemoveElement(char* cmnd_args[], int* arg_count, int index);
 
 void ExecBuiltIn(char* cmnd_args[], int exit_code);
 void ExecuteCmnds(char* cmnd_args[]);
