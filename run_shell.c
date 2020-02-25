@@ -1,12 +1,26 @@
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
 #include "input_handling.h"
 #include "exec_cmnds.h"
+
+#define MAX_PIDS 10
 
 int main(){
     char* user_input = NULL; //variable will contain initial input from user
     char* cmnd_args[MAX_ARGS]; //array containing the parsed user input
     int arg_count = -5; //variable holding the number of parsed arguments
     Shell_Flags shell_flags; //struct of shell_flags used for processing commands
+
+    pid_t child_pid = -5;
     int exit_code = -5; 
+    int child_exit_status = -5;
+
+    int redir_result = -5;
+
+    pid_t pids[MAX_PIDS];
+    int bg_pid_count = 0;
 
     //infinitie while loop 
     while(1){
@@ -17,14 +31,7 @@ int main(){
         if(arg_count <= 0){
             continue;
         }
-        /*********** REMOVE ********************************************************/
-        int i;
-        printf("\n(run_shell.c)\nArgs: [%d]\n", arg_count);
-        for(i = 0; i < arg_count; i++){
-           printf("[%d]: %s [%d]\n", i, cmnd_args[i], (int)strlen(cmnd_args[i]));
-        }
-        printf("\n");
-        /********* REMOVE *********************************************************/
+        
         int input_redir_index = 0; //holds index number for the location of "<" in the array
         int output_redir_index = 0; //holds index number for the location of ">" in the array
         char* input_redir_file = NULL; //holds value for where input redirection will occur
@@ -35,10 +42,6 @@ int main(){
         SetBackgroundFlag(cmnd_args, arg_count, &shell_flags); //if the last element contains "&", this will set flag true
         input_redir_index = SetStdinRedirFlag(cmnd_args, arg_count, &shell_flags); //if "<" is found, flag will be set true, and the index location will be returned
         output_redir_index = SetStdoutRedirFlag(cmnd_args, arg_count, &shell_flags); //if ">" is found, flag will be set true, and the index location will be returned
-        
-        /*********** REMOVE ********************************************************/
-        GetFlags(&shell_flags);
-        /*********** REMOVE ********************************************************/
 
         /***************************************************************************
          * Based on the flags set:
@@ -56,17 +59,54 @@ int main(){
             output_redir_file = GetRedirFile(cmnd_args, output_redir_index); //get output redirection info
         }
         RemoveCmndArgs(cmnd_args, &arg_count, &shell_flags); //remove redirection related arguments as they have all been extracted
-
-        /*********** REMOVE ********************************************************/
-        printf("\n(run_shell.c - post processing)\nArgs: [%d]\n", arg_count);
-        for(i = 0; i < arg_count; i++){
-           printf("[%d]: %s [%d]\n", i, cmnd_args[i], (int)strlen(cmnd_args[i]));
+        /***************************************************************************
+         * Based on the flags set:
+         * - Built-in commands will be executed immediately, otherwise
+         * - User commands will be processed further prior to execution of non
+         *   built-in commands.
+         ***************************************************************************/
+        child_pid = fork();
+        switch(child_pid){
+            case -1:
+                perror("Fork error: ");
+                exit(1);
+                break;
+            case 0:
+                //SetupRedirections(&shell_flags, input_redir_file, output_redir_file);
+                execvp(cmnd_args[0], cmnd_args);
+                perror("Execvp() error: ");
+                exit(1);
+                break;
+            default:
+                child_pid = waitpid(child_pid, &child_exit_status, 0);
+                if(WIFEXITED(child_exit_status) != 0){
+                    exit_code = WEXITSTATUS(child_exit_status);
+                }
+                if(WIFSIGNALED(child_exit_status) != 0){
+                    exit_code = WTERMSIG(child_exit_status);
+                }
+                break;
         }
-        printf("input redir: %s\n", input_redir_file);
-        printf("output redir: %s\n", output_redir_file);
-        printf("\n");
-        /********* REMOVE *********************************************************/
         FreeInput(cmnd_args);
     }
     return 0;
 }
+
+        /*********** REMOVE ********************************************************
+         *int i;
+         *printf("\n(run_shell.c)\nArgs: [%d]\n", arg_count);
+         *for(i = 0; i < arg_count; i++){
+         *   printf("[%d]: %s [%d]\n", i, cmnd_args[i], (int)strlen(cmnd_args[i]));
+         *}
+         *printf("\n");
+         ******** REMOVE *********************************************************/
+
+        /*********** REMOVE ********************************************************
+         *printf("\n(run_shell.c - post processing)\nArgs: [%d]\n", arg_count);
+         *for(i = 0; i < arg_count; i++){
+         *   printf("[%d]: %s [%d]\n", i, cmnd_args[i], (int)strlen(cmnd_args[i]));
+         *}
+         *printf("input redir: %s\n", input_redir_file);
+         *printf("output redir: %s\n", output_redir_file);
+         *printf("\n");
+         ********* REMOVE *********************************************************/
