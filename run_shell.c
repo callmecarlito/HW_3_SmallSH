@@ -17,8 +17,8 @@ int main(){
     int exit_code = -5; 
     int child_exit_status = -5;
 
-    //pid_t pids[MAX_PIDS];
-    //int bg_pid_count = 0;
+    pid_t pids[MAX_PIDS];
+    int bg_pid_count = 0;
 
     //infinitie while loop 
     while(1){
@@ -73,25 +73,41 @@ int main(){
                 RedirectionHandler(&shell_flags, input_redir_file, output_redir_file);
                 //print pid of backgroud process before executing cmnds
                 if(shell_flags.background_proc == true){ 
-                    printf("background pid is: %d", getpid()); fflush(stdout);
+                    printf("background pid is: %d\n", getpid()); fflush(stdout);
                 }
                 //execute non built-in commands
                 execvp(cmnd_args[0], cmnd_args);
                 //if error occurs with excvp()
                 perror("Execvp() error: "); exit(1); break;
             default:
-                //if(shell_flags.background_proc == true){
-                //    pids[bg_pid_count++] = child_pid;
-                //}
-                //else{
-                //    
-                //}
-                child_pid = waitpid(child_pid, &child_exit_status, 0);
-                if(WIFEXITED(child_exit_status) != 0){
-                    exit_code = WEXITSTATUS(child_exit_status);
+                if(shell_flags.background_proc == true){
+                    pid_t actual_pid = waitpid(child_pid, &child_exit_status, WNOHANG);
+                    if(actual_pid == -1){
+                        perror("Error with waitpid(): ");
+                        pids[bg_pid_count++] = child_pid; //will attempt to check child_pid again
+                    }
+                    else if(actual_pid == 0){
+                        pids[bg_pid_count++] = child_pid; //no change of state has occurred in child, will need to check again
+                    }
+                    else{
+                        //analyze and set exit code
+                        if(WIFEXITED(child_exit_status) != 0){
+                            exit_code = WEXITSTATUS(child_exit_status);
+                        }
+                        if(WIFSIGNALED(child_exit_status) != 0){
+                            exit_code = WTERMSIG(child_exit_status);
+                        }
+                    }
+                    
                 }
-                if(WIFSIGNALED(child_exit_status) != 0){
-                    exit_code = WTERMSIG(child_exit_status);
+                else{
+                    child_pid = waitpid(child_pid, &child_exit_status, 0); //blocks parent process until child terminates
+                    if(WIFEXITED(child_exit_status) != 0){
+                        exit_code = WEXITSTATUS(child_exit_status);
+                    }
+                    if(WIFSIGNALED(child_exit_status) != 0){
+                        exit_code = WTERMSIG(child_exit_status);
+                    }    
                 }
                 break;
         }
