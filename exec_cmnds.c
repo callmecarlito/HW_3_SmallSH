@@ -248,16 +248,13 @@ void BackgroundProcHandler(pid_t child_pid, pid_t* pids, int* bg_pid_count, int*
  **********************************************************************/
 void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code){
     int i = 0;
-    int index = -5;
     int child_exit_status = -5;
+
     while(i != *bg_pid_count){
         pid_t actual_pid = waitpid(pids[i], &child_exit_status, WNOHANG);
         if(actual_pid == -1){
             perror("Error with waitpid(): ");
             //pids[bg_pid_count++] = child_pid; //will attempt to check child_pid again
-        }
-        else if(actual_pid == 0){
-            continue;
         }
         else{
             if(WIFEXITED(child_exit_status) != 0){
@@ -266,7 +263,8 @@ void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code){
             if(WIFSIGNALED(child_exit_status) != 0){
                 *status_code = WTERMSIG(child_exit_status);
             }
-            RemoveProcess(pids, bg_pid_count, index);
+            RemoveProcess(pids, bg_pid_count, i);
+            continue;
         }
         i++;
     }
@@ -275,5 +273,10 @@ void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code){
  * 
  **********************************************************************/
 void RemoveProcess(pid_t* pids, int* bg_pid_count, int index){
+    int i;
 
+    for(i = index; i < *bg_pid_count; i++){
+        pids[i] = pids[i + 1];
+    }
+    (*bg_pid_count)--;
 }
