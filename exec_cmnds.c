@@ -250,14 +250,13 @@ void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code){
     int i = 0;
     int child_exit_status = -5;
 
-    while(i != *bg_pid_count){
-        pid_t actual_pid = waitpid(pids[i], &child_exit_status, WNOHANG);
-        if(actual_pid == -1){
+    while(i <= *bg_pid_count && *bg_pid_count > 0){
+        pid_t child_pid = waitpid(pids[i], &child_exit_status, WNOHANG);
+        if(child_pid == -1){
             perror("Error with waitpid(): ");
-            //pids[bg_pid_count++] = child_pid; //will attempt to check child_pid again
         }
-        else{
-            if(WIFEXITED(child_exit_status) != 0){
+        else if(child_pid > 0){
+            if(WIFEXITED(child_exit_status) > 0){
                 *status_code = WEXITSTATUS(child_exit_status);
             }
             if(WIFSIGNALED(child_exit_status) != 0){
