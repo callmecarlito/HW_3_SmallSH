@@ -1,9 +1,7 @@
-#include <unistd.h>
-
 #include "input_handling.h"
 #include "exec_cmnds.h"
 
-#define MAX_PIDS 10
+#define MAX_PIDS 20
 
 int main(){
 
@@ -19,12 +17,17 @@ int main(){
     pid_t pids[MAX_PIDS];
     int bg_pid_count = 0;
 
+    memset(cmnd_args, '\0', sizeof(memset));
+    memset(pids, '\0', sizeof(pids));
+
     //infinitie while loop 
     while(1){
         //check pids for terminated/exitted child process
         //remove from pids array
         //print exit status of last terminated child process
-        CheckBgProcesses(pids, &bg_pid_count, status_code);
+        if(bg_pid_count > 0){
+            CheckBgProcesses(pids, &bg_pid_count, &status_code);
+        }
         //get user input and process input into separate arguments
         arg_count = ProcessInput(user_input, cmnd_args);
         //if there's an error that occurs in ProcessInput() it will return 0
@@ -73,7 +76,7 @@ int main(){
             case 0:
                 //print pid of backgroud process before executing cmnds
                 if(shell_flags.background_proc == true){ 
-                    printf("background pid is: %d\n", getpid()); fflush(stdout);
+                    printf("Background pid is: %d\n", getpid()); fflush(stdout); 
                 }
                 //Setup any redirections
                 RedirectionHandler(&shell_flags, input_redir_file, output_redir_file);
@@ -83,8 +86,9 @@ int main(){
                 perror("Execvp() error: "); free(cmnd_args[0]); exit(1); break;
             default:
                 if(shell_flags.background_proc == true){
-                    BackgroundProcHandler(child_pid, pids, &bg_pid_count, &status_code);
                     
+                    pids[bg_pid_count++] = child_pid;
+                    //BackgroundProcHandler(child_pid, pids, &bg_pid_count, &status_code);
                 }
                 else{
                     //blocks parent process until child (foreground process) terminates 
@@ -95,16 +99,7 @@ int main(){
         FreeInput(cmnd_args);
     }
     return 0;
-}
-
-        /*********** REMOVE ********************************************************
-         *int i;
-         *printf("\n(run_shell.c)\nArgs: [%d]\n", arg_count);
-         *for(i = 0; i < arg_count; i++){
-         *   printf("[%d]: %s [%d]\n", i, cmnd_args[i], (int)strlen(cmnd_args[i]));
-         *}
-         *printf("\n");
-         ******** REMOVE *********************************************************/
+}        
 
         /*********** REMOVE ********************************************************
          *printf("\n(run_shell.c - post processing)\nArgs: [%d]\n", arg_count);
