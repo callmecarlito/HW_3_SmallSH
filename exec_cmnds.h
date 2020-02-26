@@ -30,6 +30,8 @@ void RemoveElement(char* cmnd_args[], int* arg_count, int index);
 void ExecBuiltIn(char* cmnd_args[], int exit_code);
 
 void ExecuteCmnds(char* cmnd_args[]);
-void SetupRedirections(Shell_Flags* shell_flags, char* input_redir_file, char* output_redir_file);
+void RedirectionHandler(Shell_Flags* shell_flags, char* input_redir_file, char* output_redir_file);
+void SetupStdinRedir(char* target_file);
+void SetupStdoutRedir(char* target_file);
 
 #endif

@@ -148,43 +148,61 @@ void ExecBuiltIn(char* cmnd_args[], int exit_code){
 /**********************************************************************
  * 
  **********************************************************************/
-void SetupRedirections(Shell_Flags* shell_flags, char* input_redir_file, char* output_redir_file){
-    int target_fd = -5;
-    int redir_result = -5;
+void RedirectionHandler(Shell_Flags* shell_flags, char* input_redir_file, char* output_redir_file){
     char* devnull_file = "/dev/null";
 
     if(shell_flags->background_proc == true){
         //redirect stdin
-        target_fd = open(devnull_file, O_RDONLY);
-        if(target_fd == -1){
-            perror("Error opening input file: ");
+        SetupStdinRedir(devnull_file);
+        //redirect stdout
+        SetupStdoutRedir(devnull_file);
+    }
+    if(shell_flags->stdin_redirect == true){
+        SetupStdoutRedir(input_redir_file);
+    }
+    if(shell_flags->stdout_redirect == true){
+        SetupStdoutRedir(output_redir_file);
+    }
+}
+/**********************************************************************
+ * 
+ **********************************************************************/
+void SetupStdinRedir(char* target_file){
+    int target_fd = open(target_file, O_RDONLY);
+
+    if(target_fd == -1){
+        perror("Error opening input file: ");
+        exit(1); //exit child process with code 1
+    }
+    else{
+        int redir_result = dup2(target_fd, 0);
+        if(redir_result == -1){
+            perror("Error with dup2() of input file: ");
             exit(1); //exit child process with code 1
         }
-        else{
-            redir_result = dup2(target_fd, 0);
-            if(redir_result == -1){
-                perror("Error with dup2() of input file: ");
-                exit(1);
-            }
-        }
-        //set fd flags so that the target_fd should be closed when execvp() is invoked
-        fcntl(target_fd, F_SETFD, FD_CLOEXEC); 
-        //redirect stdout
-        target_fd = open(devnull_file, O_WRONLY);
-        if(target_fd == -1){
-            perror("Error opening output file: ");
+    }
+    //set fd flags so that the target_fd should be closed when execvp() is invoked
+    fcntl(target_fd, F_SETFD, FD_CLOEXEC);
+}
+/**********************************************************************
+ * 
+ **********************************************************************/
+void SetupStdoutRedir(char* target_file){
+    int target_fd = open(target_file, O_WRONLY | O_CREAT | O_TRUNC);
+
+    if(target_fd == -1){
+        perror("Error opening output file: ");
+        exit(1);
+    }
+    else{
+        int redir_result = dup2(target_fd, 1);
+        if(redir_result == -1){
+            perror("Error with dup2() of output file: ");
             exit(1);
         }
-        else{
-            redir_result = dup2(target_fd, 1);
-            if(redir_result == -1){
-                perror("Error with dup2() of output file: ");
-                exit(1);
-            }
-        }
-
-        fcntl(target_fd, F_SETFD, FD_CLOEXEC);
     }
+    //set fd flags so that the target_fd should be closed when execvp() is invoked
+    fcntl(target_fd, F_SETFD, FD_CLOEXEC);
 }
 /**********************************************************************
  * 

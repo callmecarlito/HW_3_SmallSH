@@ -17,8 +17,8 @@ int main(){
     int exit_code = -5; 
     int child_exit_status = -5;
 
-    pid_t pids[MAX_PIDS];
-    int bg_pid_count = 0;
+    //pid_t pids[MAX_PIDS];
+    //int bg_pid_count = 0;
 
     //infinitie while loop 
     while(1){
@@ -30,9 +30,7 @@ int main(){
         arg_count = ProcessInput(user_input, cmnd_args);
         //if there's an error that occurs in ProcessInput() it will return 0
         //and will return to the top of the loop to re-attempt getting user input
-        if(arg_count <= 0){
-            continue;
-        }
+        if(arg_count <= 0){continue;}
         
         int input_redir_index = 0; //holds index number for the location of "<" in the array
         int output_redir_index = 0; //holds index number for the location of ">" in the array
@@ -70,20 +68,17 @@ int main(){
         child_pid = fork();
         switch(child_pid){
             case -1:
-                perror("Fork error: ");
-                exit(1);
-                break;
+                perror("Fork error: "); exit(1); break;
             case 0:
-                SetupRedirections(&shell_flags, input_redir_file, output_redir_file);
-
-                //if(shell_flags.background_proc == true){ //print pid of backgroud process before executing cmnds
-                //    printf("background pid is: %d", (int)getpid());
-                //}
-
+                RedirectionHandler(&shell_flags, input_redir_file, output_redir_file);
+                //print pid of backgroud process before executing cmnds
+                if(shell_flags.background_proc == true){ 
+                    printf("background pid is: %d", getpid()); fflush(stdout);
+                }
+                //execute non built-in commands
                 execvp(cmnd_args[0], cmnd_args);
-                perror("Execvp() error: ");
-                exit(1);
-                break;
+                //if error occurs with excvp()
+                perror("Execvp() error: "); exit(1); break;
             default:
                 //if(shell_flags.background_proc == true){
                 //    pids[bg_pid_count++] = child_pid;
