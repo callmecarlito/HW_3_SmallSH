@@ -263,6 +263,7 @@ void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code){
             if(WIFSIGNALED(child_exit_status) != 0){
                 *status_code = WTERMSIG(child_exit_status);
             }
+            printf("Background pid %d is done: Exit value %d\n", pids[i], *status_code);
             RemoveProcess(pids, bg_pid_count, i);
             continue;
         }

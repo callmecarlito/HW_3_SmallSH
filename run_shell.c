@@ -24,7 +24,7 @@ int main(){
         //check pids for terminated/exitted child process
         //remove from pids array
         //print exit status of last terminated child process
-
+        CheckBgProcesses(pids, &bg_pid_count, status_code);
         //get user input and process input into separate arguments
         arg_count = ProcessInput(user_input, cmnd_args);
         //if there's an error that occurs in ProcessInput() it will return 0
@@ -80,7 +80,7 @@ int main(){
                 //execute non built-in commands
                 execvp(cmnd_args[0], cmnd_args);
                 //if error occurs with excvp()
-                perror("Execvp() error: "); exit(1); break;
+                perror("Execvp() error: "); free(cmnd_args[0]); exit(1); break;
             default:
                 if(shell_flags.background_proc == true){
                     BackgroundProcHandler(child_pid, pids, &bg_pid_count, &status_code);
