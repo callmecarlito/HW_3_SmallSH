@@ -33,6 +33,6 @@ void ChangeDirCmnd(char* cmnd_args[]){
 /**********************************************************************
  * CurrentStatus() -
  **********************************************************************/
-int StatusCmnd(int stat_code){
-    return 0;
+void StatusCmnd(int status_code){
+    printf("Exit value %d\n", status_code);
 }

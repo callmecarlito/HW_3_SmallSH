@@ -8,6 +8,6 @@
 
 void ExitCmnd(int exit_code);
 void ChangeDirCmnd(char* cmnd_args[]);
-int StatusCmnd(int stat_code);
+void StatusCmnd(int status_code);
 
 #endif 
