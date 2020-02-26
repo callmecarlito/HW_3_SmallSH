@@ -148,7 +148,44 @@ void ExecBuiltIn(char* cmnd_args[], int exit_code){
 /**********************************************************************
  * 
  **********************************************************************/
+void SetupRedirections(Shell_Flags* shell_flags, char* input_redir_file, char* output_redir_file){
+    int target_fd = -5;
+    int redir_result = -5;
+    char* devnull_file = "/dev/null";
 
+    if(shell_flags->background_proc == true){
+        //redirect stdin
+        target_fd = open(devnull_file, O_RDONLY);
+        if(target_fd == -1){
+            perror("Error opening input file: ");
+            exit(1); //exit child process with code 1
+        }
+        else{
+            redir_result = dup2(target_fd, 0);
+            if(redir_result == -1){
+                perror("Error with dup2() of input file: ");
+                exit(1);
+            }
+        }
+        //set fd flags so that the target_fd should be closed when execvp() is invoked
+        fcntl(target_fd, F_SETFD, FD_CLOEXEC); 
+        //redirect stdout
+        target_fd = open(devnull_file, O_WRONLY);
+        if(target_fd == -1){
+            perror("Error opening output file: ");
+            exit(1);
+        }
+        else{
+            redir_result = dup2(target_fd, 1);
+            if(redir_result == -1){
+                perror("Error with dup2() of output file: ");
+                exit(1);
+            }
+        }
+
+        fcntl(target_fd, F_SETFD, FD_CLOEXEC);
+    }
+}
 /**********************************************************************
  * 
  **********************************************************************/

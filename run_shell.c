@@ -17,13 +17,15 @@ int main(){
     int exit_code = -5; 
     int child_exit_status = -5;
 
-    int redir_result = -5;
-
     pid_t pids[MAX_PIDS];
     int bg_pid_count = 0;
 
     //infinitie while loop 
     while(1){
+        //check pids for terminated/exitted child process
+        //remove from pids array
+        //print exit status of last terminated child process
+
         //get user input and process input into separate arguments
         arg_count = ProcessInput(user_input, cmnd_args);
         //if there's an error that occurs in ProcessInput() it will return 0
@@ -72,12 +74,23 @@ int main(){
                 exit(1);
                 break;
             case 0:
-                //SetupRedirections(&shell_flags, input_redir_file, output_redir_file);
+                SetupRedirections(&shell_flags, input_redir_file, output_redir_file);
+
+                //if(shell_flags.background_proc == true){ //print pid of backgroud process before executing cmnds
+                //    printf("background pid is: %d", (int)getpid());
+                //}
+
                 execvp(cmnd_args[0], cmnd_args);
                 perror("Execvp() error: ");
                 exit(1);
                 break;
             default:
+                //if(shell_flags.background_proc == true){
+                //    pids[bg_pid_count++] = child_pid;
+                //}
+                //else{
+                //    
+                //}
                 child_pid = waitpid(child_pid, &child_exit_status, 0);
                 if(WIFEXITED(child_exit_status) != 0){
                     exit_code = WEXITSTATUS(child_exit_status);

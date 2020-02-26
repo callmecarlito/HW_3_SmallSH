@@ -1,9 +1,11 @@
 #ifndef EXEC_CMNDS
 #define EXEC_CMNDS
 
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+//#include <sys/types.h>
 
 #include "built_in_cmnds.h"
 
