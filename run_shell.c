@@ -1,5 +1,3 @@
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #include "input_handling.h"
@@ -8,14 +6,15 @@
 #define MAX_PIDS 10
 
 int main(){
+
     char* user_input = NULL; //variable will contain initial input from user
     char* cmnd_args[MAX_ARGS]; //array containing the parsed user input
     int arg_count = -5; //variable holding the number of parsed arguments
     Shell_Flags shell_flags; //struct of shell_flags used for processing commands
 
     pid_t child_pid = -5;
-    int exit_code = -5; 
-    int child_exit_status = -5;
+    int status_code = -5; 
+    //int child_exit_status = -5;
 
     pid_t pids[MAX_PIDS];
     int bg_pid_count = 0;
@@ -50,7 +49,9 @@ int main(){
          *   built-in commands.
          ***************************************************************************/
         if(shell_flags.built_in_flag == true){
-            ExecBuiltIn(cmnd_args, exit_code); //execution of built-in commands
+            ExecBuiltIn(cmnd_args, status_code); //execution of built-in commands
+            free(cmnd_args[0]);
+            continue;
         }
         if(shell_flags.stdin_redirect == true){
             input_redir_file = GetRedirFile(cmnd_args, input_redir_index); //get input redirection info
@@ -70,44 +71,24 @@ int main(){
             case -1:
                 perror("Fork error: "); exit(1); break;
             case 0:
-                RedirectionHandler(&shell_flags, input_redir_file, output_redir_file);
                 //print pid of backgroud process before executing cmnds
                 if(shell_flags.background_proc == true){ 
                     printf("background pid is: %d\n", getpid()); fflush(stdout);
                 }
+                //Setup any redirections
+                RedirectionHandler(&shell_flags, input_redir_file, output_redir_file);
                 //execute non built-in commands
                 execvp(cmnd_args[0], cmnd_args);
                 //if error occurs with excvp()
                 perror("Execvp() error: "); exit(1); break;
             default:
                 if(shell_flags.background_proc == true){
-                    pid_t actual_pid = waitpid(child_pid, &child_exit_status, WNOHANG);
-                    if(actual_pid == -1){
-                        perror("Error with waitpid(): ");
-                        pids[bg_pid_count++] = child_pid; //will attempt to check child_pid again
-                    }
-                    else if(actual_pid == 0){
-                        pids[bg_pid_count++] = child_pid; //no change of state has occurred in child, will need to check again
-                    }
-                    else{
-                        //analyze and set exit code
-                        if(WIFEXITED(child_exit_status) != 0){
-                            exit_code = WEXITSTATUS(child_exit_status);
-                        }
-                        if(WIFSIGNALED(child_exit_status) != 0){
-                            exit_code = WTERMSIG(child_exit_status);
-                        }
-                    }
+                    BackgroundProcHandler(child_pid, pids, &bg_pid_count, &status_code);
                     
                 }
                 else{
-                    child_pid = waitpid(child_pid, &child_exit_status, 0); //blocks parent process until child terminates
-                    if(WIFEXITED(child_exit_status) != 0){
-                        exit_code = WEXITSTATUS(child_exit_status);
-                    }
-                    if(WIFSIGNALED(child_exit_status) != 0){
-                        exit_code = WTERMSIG(child_exit_status);
-                    }    
+                    //blocks parent process until child (foreground process) terminates 
+                    ForegroundProcHandler(child_pid, &status_code);
                 }
                 break;
         }
