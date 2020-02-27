@@ -1,5 +1,6 @@
 #include "input_handling.h"
 #include "exec_cmnds.h"
+#include "special_signals.h"
 
 #define MAX_PIDS 20 //set to 20, can adjust accordingly
 
@@ -19,6 +20,8 @@ int main(){
     memset(cmnd_args, '\0', sizeof(memset));
     memset(pids, '\0', sizeof(pids));
 
+    bool foreground_only = false;
+
     //infinitie while loop 
     while(1){
         //check (background)pids for terminated/exitted child process
@@ -34,7 +37,10 @@ int main(){
         //if there's an error that occurs in ProcessInput() it will return 0
         //and will return to the top of the loop to re-attempt getting user input
         if(arg_count <= 0){continue;}
-        
+        //
+        if(foreground_only && (strcmp(cmnd_args[arg_count - 1], "&") == 0)){
+            RemoveElement(cmnd_args, &arg_count, arg_count - 1); //remove & at the end before setting flags
+        }
         int input_redir_index = 0; //holds index number for the location of "<" in the array
         int output_redir_index = 0; //holds index number for the location of ">" in the array
         char* input_redir_file = NULL; //holds value for where input redirection will occur
@@ -86,6 +92,7 @@ int main(){
                 //if error occurs with excvp()
                 perror("Execvp() error: "); free(cmnd_args[0]); exit(1); break;
             default: //parent process
+                sleep(1);
                 if(shell_flags.background_proc == true){
                     //add child_pid to array, will call waitpid() before next user input prompt
                     pids[bg_pid_count++] = child_pid;
