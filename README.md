@@ -115,7 +115,9 @@ Contains methogs required to execute commands
 - [x] outline each function required
   - [x] create flags for redirections and command processing
   - [x] stdin redirections
+    - [ ] fix permissions on input file
   - [x] stdout redirections
+    - [ ] fix permissions on output file
   - [x] background processes
   - [x] built-in commands
   - [x] non built-in commands
