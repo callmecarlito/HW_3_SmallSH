@@ -104,20 +104,21 @@ Contains the methods needed to execute the 3 built-in commands:
 3. cd
 ##### task list
 - [x] outline each function required
-- [ ] build exit command
-- [ ] build status command
+- [x] build exit command
+  - [ ] clean-up all child processes before exitting parent shell
+- [x] build status command
 - [x] build cd command
 
 ### exec_cmnds.h/ exec_cmnds.c
 Contains methogs required to execute commands
 #### task list
-- [ ] outline each function required
+- [x] outline each function required
   - [x] create flags for redirections and command processing
-  - [ ] stdin redirections
-  - [ ] stdout redirections
-  - [ ] background processes
-  - [ ] built-in commands
-  - [ ] non built-in commands
+  - [x] stdin redirections
+  - [x] stdout redirections
+  - [x] background processes
+  - [x] built-in commands
+  - [x] non built-in commands
   
 ## compiling and running
 Make sure to keep all the program files within the same directory. To compile from the terminal, 
