@@ -132,40 +132,36 @@ void RemoveElement(char* cmnd_args[], int* arg_count, int index){
 void ExecBuiltIn(char* cmnd_args[], int exit_code){
     //handling of built in commands
     if(strcmp(cmnd_args[0], "status") == 0){
-
         StatusCmnd(exit_code);
     }
     else if(strcmp(cmnd_args[0], "cd") == 0){
-
         ChangeDirCmnd(cmnd_args);
     }
     else if(strcmp(cmnd_args[0], "exit") == 0){
-
         free(cmnd_args[0]);
         ExitCmnd(exit_code);
     }
 }
 /**********************************************************************
- * 
+ * RedirectionHander() - Based on the shell flags and command arguments,
+ * sets up any redirections from stdout/stdin
  **********************************************************************/
 void RedirectionHandler(Shell_Flags* shell_flags, char* input_redir_file, char* output_redir_file){
     char* devnull_file = "/dev/null";
 
     if(shell_flags->background_proc == true){
-        //redirect stdin
-        SetupStdinRedir(devnull_file);
-        //redirect stdout
-        SetupStdoutRedir(devnull_file);
+        SetupStdinRedir(devnull_file); //redirect stdin
+        SetupStdoutRedir(devnull_file); //redirect stdout
     }
     if(shell_flags->stdin_redirect == true){
-        SetupStdoutRedir(input_redir_file);
+        SetupStdoutRedir(input_redir_file); //redirect stdin
     }
     if(shell_flags->stdout_redirect == true){
-        SetupStdoutRedir(output_redir_file);
+        SetupStdoutRedir(output_redir_file); //redirect stdout
     }
 }
 /**********************************************************************
- * 
+ * SetupStdinRedir() - 
  **********************************************************************/
 void SetupStdinRedir(char* target_file){
     int target_fd = open(target_file, O_RDONLY);
@@ -175,7 +171,7 @@ void SetupStdinRedir(char* target_file){
         exit(1); //exit child process with code 1
     }
     else{
-        int redir_result = dup2(target_fd, 0);
+        int redir_result = dup2(target_fd, 0); //redirects input from 0 to target file
         if(redir_result == -1){
             perror("Error with dup2() of input file: ");
             exit(1); //exit child process with code 1
@@ -185,7 +181,7 @@ void SetupStdinRedir(char* target_file){
     fcntl(target_fd, F_SETFD, FD_CLOEXEC);
 }
 /**********************************************************************
- * 
+ * SetupStdoutRedir() - 
  **********************************************************************/
 void SetupStdoutRedir(char* target_file){
     int target_fd = open(target_file, O_WRONLY | O_CREAT | O_TRUNC);
@@ -205,7 +201,8 @@ void SetupStdoutRedir(char* target_file){
     fcntl(target_fd, F_SETFD, FD_CLOEXEC);
 }
 /**********************************************************************
- * 
+ * ForegroundProcHandler() - handles clean up of child processes ran
+ * in the foreground of the shell
  **********************************************************************/
 void ForegroundProcHandler(pid_t child_pid, int* status_code){
     int child_exit_status = -5;
@@ -220,7 +217,7 @@ void ForegroundProcHandler(pid_t child_pid, int* status_code){
     }
 }
 /**********************************************************************
- * 
+ * BackgroundProcHandler() - Ended up not using this function
  **********************************************************************/
 void BackgroundProcHandler(pid_t child_pid, pid_t* pids, int* bg_pid_count, int* status_code){
     int child_exit_status = -5;
@@ -244,18 +241,20 @@ void BackgroundProcHandler(pid_t child_pid, pid_t* pids, int* bg_pid_count, int*
     }
 }
 /**********************************************************************
- * 
+ * CheckBgProcesses() - When a background process is executed, the shell
+ * adds the child pid to an array and before each prompt to the user for 
+ * input, this is executed to clean up  any terminated processes
  **********************************************************************/
 void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code){
     int i = 0;
     int child_exit_status = -5;
 
     while(i <= *bg_pid_count && *bg_pid_count > 0){
-        pid_t child_pid = waitpid(pids[i], &child_exit_status, WNOHANG);
+        pid_t child_pid = waitpid(pids[i], &child_exit_status, WNOHANG); //WNOHANG prevents blocking of the parent process
         if(child_pid == -1){
             perror("Error with waitpid(): ");
         }
-        else if(child_pid > 0){
+        else if(child_pid > 0){ //when waitpid() returns with anything > 0, it's returning the pid of a terminated process
             if(WIFEXITED(child_exit_status) > 0){
                 *status_code = WEXITSTATUS(child_exit_status);
             }
@@ -263,20 +262,21 @@ void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code){
                 *status_code = WTERMSIG(child_exit_status);
             }
             printf("Background pid %d is done: Exit value %d\n", pids[i], *status_code);
-            RemoveProcess(pids, bg_pid_count, i);
+            RemoveProcess(pids, bg_pid_count, i); //removes child pid from array
             continue;
         }
         i++;
     }
 }
 /**********************************************************************
- * 
+ * RemoveProcess() - called by CheckBgProcesses when a child pid needs
+ * to be removed from the array
  **********************************************************************/
 void RemoveProcess(pid_t* pids, int* bg_pid_count, int index){
     int i;
-
+    //shifts elements over
     for(i = index; i < *bg_pid_count; i++){
         pids[i] = pids[i + 1];
     }
-    (*bg_pid_count)--;
+    (*bg_pid_count)--; //decrements pid count
 }

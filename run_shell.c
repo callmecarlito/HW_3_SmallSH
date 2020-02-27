@@ -1,7 +1,7 @@
 #include "input_handling.h"
 #include "exec_cmnds.h"
 
-#define MAX_PIDS 20
+#define MAX_PIDS 20 //set to 20, can adjust accordingly
 
 int main(){
 
@@ -10,24 +10,25 @@ int main(){
     int arg_count = -5; //variable holding the number of parsed arguments
     Shell_Flags shell_flags; //struct of shell_flags used for processing commands
 
-    pid_t child_pid = -5;
-    int status_code = -5; 
-    //int child_exit_status = -5;
+    pid_t child_pid = -5; //variable containg most recently fork child pid
+    int status_code = -5;  //contains most recently set status code
 
-    pid_t pids[MAX_PIDS];
-    int bg_pid_count = 0;
+    pid_t pids[MAX_PIDS]; //array containing background pid's
+    int bg_pid_count = 0; //keeps count of the number of elements in the array
 
     memset(cmnd_args, '\0', sizeof(memset));
     memset(pids, '\0', sizeof(pids));
 
     //infinitie while loop 
     while(1){
-        //check pids for terminated/exitted child process
+        //check (background)pids for terminated/exitted child process
         //remove from pids array
         //print exit status of last terminated child process
         if(bg_pid_count > 0){
             CheckBgProcesses(pids, &bg_pid_count, &status_code);
         }
+        //if after last call to CheckBgProcess and no child
+        //if(bg_pid_count == MAX_PIDS){continue;}
         //get user input and process input into separate arguments
         arg_count = ProcessInput(user_input, cmnd_args);
         //if there's an error that occurs in ProcessInput() it will return 0
@@ -53,7 +54,7 @@ int main(){
          ***************************************************************************/
         if(shell_flags.built_in_flag == true){
             ExecBuiltIn(cmnd_args, status_code); //execution of built-in commands
-            free(cmnd_args[0]);
+            free(cmnd_args[0]); //free allocated memory
             continue;
         }
         if(shell_flags.stdin_redirect == true){
@@ -69,12 +70,12 @@ int main(){
          * - User commands will be processed further prior to execution of non
          *   built-in commands.
          ***************************************************************************/
-        child_pid = fork();
+        child_pid = fork(); //create child process
         switch(child_pid){
-            case -1:
+            case -1: //case of error
                 perror("Fork error: "); exit(1); break;
-            case 0:
-                //print pid of backgroud process before executing cmnds
+            case 0: //child process
+                //print pid of backgroud/child process before executing cmnds
                 if(shell_flags.background_proc == true){ 
                     printf("Background pid is: %d\n", getpid()); fflush(stdout); 
                 }
@@ -84,29 +85,19 @@ int main(){
                 execvp(cmnd_args[0], cmnd_args);
                 //if error occurs with excvp()
                 perror("Execvp() error: "); free(cmnd_args[0]); exit(1); break;
-            default:
+            default: //parent process
                 if(shell_flags.background_proc == true){
-                    
+                    //add child_pid to array, will call waitpid() before next user input prompt
                     pids[bg_pid_count++] = child_pid;
                     //BackgroundProcHandler(child_pid, pids, &bg_pid_count, &status_code);
                 }
                 else{
-                    //blocks parent process until child (foreground process) terminates 
+                    //blocks parent process until child (foreground process) terminates and sets status_code
                     ForegroundProcHandler(child_pid, &status_code);
                 }
                 break;
         }
-        FreeInput(cmnd_args);
+        FreeInput(cmnd_args); //free allocated memory
     }
     return 0;
 }        
-
-        /*********** REMOVE ********************************************************
-         *printf("\n(run_shell.c - post processing)\nArgs: [%d]\n", arg_count);
-         *for(i = 0; i < arg_count; i++){
-         *   printf("[%d]: %s [%d]\n", i, cmnd_args[i], (int)strlen(cmnd_args[i]));
-         *}
-         *printf("input redir: %s\n", input_redir_file);
-         *printf("output redir: %s\n", output_redir_file);
-         *printf("\n");
-         ********* REMOVE *********************************************************/
