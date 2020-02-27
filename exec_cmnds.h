@@ -18,8 +18,6 @@ typedef struct Shell_Flags{
     bool background_proc;
 } Shell_Flags;
 
-
-
 void InitializeFlags(Shell_Flags* shell_flags);
 void PrintFlags(Shell_Flags* shell_flags);
 void SetBuiltInFlag(char* cmnd_args[], Shell_Flags* shell_flags);
@@ -33,11 +31,9 @@ void ExecBuiltIn(char* cmnd_args[], int exit_code);
 void RedirectionHandler(Shell_Flags* shell_flags, char* input_redir_file, char* output_redir_file);
 void SetupStdinRedir(char* target_file);
 void SetupStdoutRedir(char* target_file);
-
-void ExecuteCmnds(char* cmnd_args[]);
-
 void ForegroundProcHandler(pid_t child_pid, int* status_code);
 void BackgroundProcHandler(pid_t child_pid, pid_t* pids, int* bg_pid_count, int* status_code);
 void CheckBgProcesses(pid_t* pids, int* bg_pid_count, int* status_code);
 void RemoveProcess(pid_t* pids, int* bg_pid_count, int index);
+
 #endif
