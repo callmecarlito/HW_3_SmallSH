@@ -154,7 +154,7 @@ void RedirectionHandler(Shell_Flags* shell_flags, char* input_redir_file, char* 
         SetupStdoutRedir(devnull_file); //redirect stdout
     }
     if(shell_flags->stdin_redirect == true){
-        SetupStdoutRedir(input_redir_file); //redirect stdin
+        SetupStdinRedir(input_redir_file); //redirect stdin
     }
     if(shell_flags->stdout_redirect == true){
         SetupStdoutRedir(output_redir_file); //redirect stdout
@@ -184,7 +184,7 @@ void SetupStdinRedir(char* target_file){
  * SetupStdoutRedir() - 
  **********************************************************************/
 void SetupStdoutRedir(char* target_file){
-    int target_fd = open(target_file, O_WRONLY | O_CREAT | O_TRUNC);
+    int target_fd = open(target_file, O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
 
     if(target_fd == -1){
         perror("Error opening output file: ");

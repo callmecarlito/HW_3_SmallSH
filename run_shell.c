@@ -17,8 +17,8 @@ int main(){
     pid_t pids[MAX_PIDS]; //array containing background pid's
     int bg_pid_count = 0; //keeps count of the number of elements in the array
 
-    memset(cmnd_args, '\0', sizeof(memset));
-    memset(pids, '\0', sizeof(pids));
+    memset(cmnd_args, '\0', sizeof(memset)); //clear memory to be used for args array
+    memset(pids, '\0', sizeof(pids)); //clear memory to be used for pids array
 
     bool foreground_only = false;
 
