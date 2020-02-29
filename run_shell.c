@@ -1,8 +1,12 @@
+#include <signal.h>
+
 #include "input_handling.h"
-#include "exec_cmnds.h"
-#include "special_signals.h"
+#include "exec_cmnds.h"  
 
 #define MAX_PIDS 20 //set to 20, can adjust accordingly
+
+volatile bool foreground_only = false;
+static void AlternateSIGTSTP(int signo);
 
 int main(){
 
@@ -20,7 +24,19 @@ int main(){
     memset(cmnd_args, '\0', sizeof(memset)); //clear memory to be used for args array
     memset(pids, '\0', sizeof(pids)); //clear memory to be used for pids array
 
-    bool foreground_only = false;
+    /**********************************************/
+    struct sigaction SIGTSTP_action = {0}, ignore_action = {0};
+    
+    SIGTSTP_action.sa_handler = AlternateSIGTSTP;
+    sigfillset(&SIGTSTP_action.sa_mask);
+    SIGTSTP_action.sa_flags = SA_RESTART;
+
+    ignore_action.sa_handler = SIG_IGN;
+    
+    sigaction(SIGTSTP, &SIGTSTP_action, NULL);
+    sigaction(SIGINT, &ignore_action, NULL);
+    /**********************************************/
+
 
     //infinitie while loop 
     while(1){
@@ -81,10 +97,6 @@ int main(){
             case -1: //case of error
                 perror("Fork error: "); exit(1); break;
             case 0: //child process
-                //print pid of backgroud/child process before executing cmnds
-                if(shell_flags.background_proc == true){ 
-                    printf("Background pid is: %d\n", getpid()); fflush(stdout); 
-                }
                 //Setup any redirections
                 RedirectionHandler(&shell_flags, input_redir_file, output_redir_file);
                 //execute non built-in commands
@@ -94,6 +106,7 @@ int main(){
             default: //parent process
                 sleep(1);
                 if(shell_flags.background_proc == true){
+                    printf("Background pid is: %d\n", child_pid); fflush(stdout); 
                     //add child_pid to array, will call waitpid() before next user input prompt
                     pids[bg_pid_count++] = child_pid;
                     //BackgroundProcHandler(child_pid, pids, &bg_pid_count, &status_code);
@@ -108,3 +121,16 @@ int main(){
     }
     return 0;
 }        
+
+static void AlternateSIGTSTP(int signo){
+    if(foreground_only == false){
+        char* prompt = "Entering foreground-only mode (CTRL-Z to enable background mode)\n";
+        write(STDOUT_FILENO, prompt, 70);
+        foreground_only = true;
+    }
+    else if(foreground_only == true){
+        char* prompt = "Exiting foreground-only mode (CTRL-Z to enable foreground-only mode)\n";
+        write(STDOUT_FILENO, prompt, 70);
+        foreground_only = false;
+    }
+}
