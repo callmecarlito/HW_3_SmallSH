@@ -2,9 +2,16 @@
 This is my attempt at developing a UNIX based shell command interpreter. This is a project that I'm working on for my CS344 (Operating Systems) course. On top of working on my skills in programming in the C language, I also wanted to better my understanding of version control systems, as well as attempting to document the entire process as I work through the project. 
 
 ## Files
-Along with this README file are 2 additional files:
+Along with this README file are 8 additional files:
 1.  makefile
-2.  input_handling.c
+2.  input_handling.h
+3.  input_handling.c
+4.  built_in_cmnds.h
+5.  built_in_cmnds.c
+6.  exec_cmnds.h
+7.  exec_cmnds.c
+8.  run_shell.c
+9.  README.md
 
 ## Features
 This shell currently will have three built in commands: exit, status, and cd.
@@ -12,7 +19,7 @@ This shell currently will have three built in commands: exit, status, and cd.
 2. status - provides the user with the exit or termination code of the most recent child processes to end
 3. cd - used to change the current working directory of the shell
 
-All additional UNIX commands can be used. Program will handle execution by creating additional processes
+All additional UNIX commands can be used, with the exception of piping "|". Program will handle execution by creating additional processes
 with fork() and using execvp() to execute command.
 
 ## Requirements
