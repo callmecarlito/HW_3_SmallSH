@@ -5,8 +5,8 @@
 
 #define MAX_PIDS 20 //set to 20, can adjust accordingly
 
-volatile bool foreground_only = false;
-static void AlternateSIGTSTP(int signo);
+volatile bool foreground_only = false; //flag that will control whether "&" gets ignored
+static void AlternateSIGTSTP(int signo); //toggles the value for foreground_only
 
 int main(){
 
@@ -24,19 +24,16 @@ int main(){
     memset(cmnd_args, '\0', sizeof(memset)); //clear memory to be used for args array
     memset(pids, '\0', sizeof(pids)); //clear memory to be used for pids array
 
-    /**********************************************/
     struct sigaction SIGTSTP_action = {0}, ignore_action = {0};
     
-    SIGTSTP_action.sa_handler = AlternateSIGTSTP;
+    SIGTSTP_action.sa_handler = AlternateSIGTSTP; //changes SIGTSTP handler to implemented alternate function
     sigfillset(&SIGTSTP_action.sa_mask);
-    SIGTSTP_action.sa_flags = SA_RESTART;
+    SIGTSTP_action.sa_flags = SA_RESTART; //
 
-    ignore_action.sa_handler = SIG_IGN;
+    ignore_action.sa_handler = SIG_IGN; 
     
-    sigaction(SIGTSTP, &SIGTSTP_action, NULL);
-    sigaction(SIGINT, &ignore_action, NULL);
-    /**********************************************/
-
+    sigaction(SIGTSTP, &SIGTSTP_action, NULL); //
+    sigaction(SIGINT, &ignore_action, NULL); //
 
     //infinitie while loop 
     while(1){
